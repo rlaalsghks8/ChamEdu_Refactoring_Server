@@ -1,7 +1,7 @@
 package example.com.chamedurefact.domain.entity;
 
-import example.com.chamedu.domain.enums.AdmissionType;
-import example.com.chamedu.domain.enums.Major;
+import example.com.chamedurefact.domain.enums.AdmissionType;
+import example.com.chamedurefact.domain.enums.Major;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
