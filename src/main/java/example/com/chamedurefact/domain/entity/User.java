@@ -3,11 +3,15 @@ package example.com.chamedurefact.domain.entity;
 import example.com.chamedurefact.domain.enums.AdmissionType;
 import example.com.chamedurefact.domain.enums.Major;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class User extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
