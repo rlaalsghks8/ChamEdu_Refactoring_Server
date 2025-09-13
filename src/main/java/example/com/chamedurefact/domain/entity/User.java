@@ -1,5 +1,6 @@
 package example.com.chamedurefact.domain.entity;
 
+import example.com.chamedurefact.domain.entity.mapping.ChatUser;
 import example.com.chamedurefact.domain.enums.AdmissionType;
 import example.com.chamedurefact.domain.enums.Major;
 import jakarta.persistence.*;
@@ -43,5 +44,9 @@ public class User extends BaseEntity{
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<ChatUser> chats = new ArrayList<>();
+
 
 }
