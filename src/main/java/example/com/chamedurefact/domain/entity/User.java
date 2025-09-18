@@ -18,22 +18,22 @@ public class User extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(length=20)
     private String nickname;
 
     @Column
     private String profileImage;
 
-    @Column
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column
     private String role;
 
-    @Column
+    @Column(length=20)
     private String school;
 
-    @Column
+    @Column(length=20)
     private Major major;
 
     @Column

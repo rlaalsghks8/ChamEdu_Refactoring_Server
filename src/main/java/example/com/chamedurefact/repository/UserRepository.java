@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User,Long> {
     User findByEmail(String email);
+    boolean existsByNickname(String nickname);
 
     @Query(value = "SELECT u.* " +
             "FROM User u " +
@@ -40,8 +41,5 @@ public interface UserRepository extends JpaRepository<User,Long> {
     "LIMIT 5",
     nativeQuery = true)
     List<User> findTop5ByMajorOrderByAvgReviewScore(Major major);
-
-
-
 
 }
