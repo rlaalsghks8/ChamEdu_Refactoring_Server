@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
-
-
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @NoArgsConstructor
@@ -86,6 +84,65 @@ public class MemberService {
     }
 
     //access token으로 사용자 정보 받아오기
+    public HashMap<String, Object> fetchKakaoEmailAndName(String accessToken) {
+        String url = "https://kapi.kakao.com/v2/user/me";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);                    // Authorization: Bearer {token}
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> res = restTemplate.exchange(
+                url, HttpMethod.GET, new HttpEntity<>(headers), String.class
+        );
+
+        if (!res.getStatusCode().is2xxSuccessful() || res.getBody() == null) {
+            throw new IllegalStateException("카카오 사용자 정보 조회 실패: " + res.getStatusCode());
+        }
+
+        try {
+            JsonNode root = objectMapper.readTree(res.getBody());
+
+            // email: kakao_account.email (동의 필요)
+            String email = null;
+            JsonNode kakaoAccount = root.path("kakao_account");
+            if (kakaoAccount.isObject()) {
+                JsonNode emailNode = kakaoAccount.path("email");
+                if (emailNode.isTextual()) email = emailNode.asText();
+            }
+
+            // nickname: kakao_account.profile.nickname 우선, 없으면 properties.nickname
+            String nickname = null;
+            if (kakaoAccount.isObject()) {
+                JsonNode profile = kakaoAccount.path("profile");
+                if (profile.isObject()) {
+                    JsonNode nickNode = profile.path("nickname");
+                    if (nickNode.isTextual()) nickname = nickNode.asText();
+                }
+            }
+            if (nickname == null) {
+                JsonNode properties = root.path("properties");
+                if (properties.isObject()) {
+                    JsonNode nickNode2 = properties.path("nickname");
+                    if (nickNode2.isTextual()) nickname = nickNode2.asText();
+                }
+            }
+
+            HashMap<String, Object> userInfo = new HashMap<>();
+            userInfo.put("email", email);
+            userInfo.put("nickname", nickname);
+
+            // 확인용(마스킹)
+            log.info("Kakao user email={}, nickname={}",
+                    email != null ? email : "(null)",
+                    nickname != null ? nickname : "(null)");
+
+            return userInfo;
+
+        } catch (Exception e) {
+            throw new RuntimeException("카카오 사용자 정보 파싱 실패", e);
+        }
+    }
 
     //사용자 정보 확인, 없으면 회원가입 후 로그인, 있으면 로그인 (JWT 토큰 발급)
 
