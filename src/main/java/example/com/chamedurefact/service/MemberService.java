@@ -193,4 +193,19 @@ public class MemberService {
 
         userRepository.save(user);
     }
+
+    //프로필 조회
+    public UserProfileDto getMyProfile(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return UserProfileDto.builder()
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .university(user.getUniversity())
+                .major(user.getMajor() != null ? user.getMajor().name() : null)
+                .recruitmentType(user.getRecruitmentType() != null ? user.getRecruitmentType().name() : null)
+                .isMentor(user.isMentor())
+                .build();
+    }
 }

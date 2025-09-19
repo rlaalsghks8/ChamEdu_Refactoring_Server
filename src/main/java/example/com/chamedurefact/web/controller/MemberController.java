@@ -1,17 +1,17 @@
 package example.com.chamedurefact.web.controller;
 
 import example.com.chamedurefact.service.MemberService;
+import example.com.chamedurefact.web.dto.DefaultResponseDto;
 import example.com.chamedurefact.web.dto.LoginResponseDto;
-import example.com.chamedurefact.web.dto.OAuthCodeRequest;
 import example.com.chamedurefact.web.dto.UserProfileDto;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,5 +49,21 @@ public class MemberController {
         log.info("Received profile setup request for email: {}", profileDto.getEmail());
         memberService.setupProfile(profileDto);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<DefaultResponseDto<UserProfileDto>> getMyProfile(Authentication authentication) {
+        String email = (String) authentication.getPrincipal();
+        UserProfileDto profile = memberService.getMyProfile(email);
+
+        DefaultResponseDto<UserProfileDto> resp =
+                DefaultResponseDto.<UserProfileDto>builder()
+                        .isSuccess(true)
+                        .code("2000")
+                        .message("프로필 조회 성공")
+                        .data(profile)
+                        .build();
+
+        return ResponseEntity.ok(resp);
     }
 }
