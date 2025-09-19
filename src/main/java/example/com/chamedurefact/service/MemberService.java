@@ -9,7 +9,9 @@ import example.com.chamedurefact.jwt.JwtTokenProvider;
 import example.com.chamedurefact.repository.UserRepository;
 import example.com.chamedurefact.web.dto.KakaoTokenResponseDto;
 import example.com.chamedurefact.web.dto.LoginResponseDto;
+import example.com.chamedurefact.web.dto.UpdateUserProfileRequest;
 import example.com.chamedurefact.web.dto.UserProfileDto;
+import jakarta.transaction.Transactional;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -201,6 +203,42 @@ public class MemberService {
 
         return UserProfileDto.builder()
                 .email(user.getEmail())
+                .nickname(user.getNickname())
+                .university(user.getUniversity())
+                .major(user.getMajor() != null ? user.getMajor().name() : null)
+                .recruitmentType(user.getRecruitmentType() != null ? user.getRecruitmentType().name() : null)
+                .isMentor(user.isMentor())
+                .build();
+    }
+
+    //프로필 수정 (email, mentor 제외)
+    @Transactional
+    public UserProfileDto updateMyProfile(String emailFromJwt, UpdateUserProfileRequest req) {
+        User user = userRepository.findByEmail(emailFromJwt)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        if (req.getNickname() != null && !req.getNickname().isBlank()) {
+            String newNick = req.getNickname().trim();
+            if (!newNick.equals(user.getNickname()) && userRepository.existsByNickname(newNick)) {
+                throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            }
+            user.setNickname(newNick);
+        }
+        if (req.getUniversity() != null) {
+            user.setUniversity(req.getUniversity().trim());
+        }
+        if (req.getMajor() != null && !req.getMajor().isBlank()) {
+            user.setMajor(Major.fromKoreanName(req.getMajor().trim()));
+        }
+        if (req.getRecruitmentType() != null && !req.getRecruitmentType().isBlank()) {
+            user.setRecruitmentType(RecruitmentType.fromKoreanName(req.getRecruitmentType().trim()));
+        }
+
+        userRepository.save(user);
+
+        // 응답은 기존 UserProfileDto로
+        return UserProfileDto.builder()
+                .email(user.getEmail())   // 읽기 전용
                 .nickname(user.getNickname())
                 .university(user.getUniversity())
                 .major(user.getMajor() != null ? user.getMajor().name() : null)

@@ -3,6 +3,7 @@ package example.com.chamedurefact.web.controller;
 import example.com.chamedurefact.service.MemberService;
 import example.com.chamedurefact.web.dto.DefaultResponseDto;
 import example.com.chamedurefact.web.dto.LoginResponseDto;
+import example.com.chamedurefact.web.dto.UpdateUserProfileRequest;
 import example.com.chamedurefact.web.dto.UserProfileDto;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -65,5 +66,24 @@ public class MemberController {
                         .build();
 
         return ResponseEntity.ok(resp);
+    }
+
+    @PutMapping("/me")
+    @Operation(summary = "내 프로필 수정", description = "JWT 토큰의 사용자 기준으로 프로필 수정(이메일은 수정 불가)")
+    public ResponseEntity<DefaultResponseDto<UserProfileDto>> updateMyProfile(
+            Authentication authentication,
+            @RequestBody UpdateUserProfileRequest req) {
+
+        String email = (String) authentication.getPrincipal();
+        UserProfileDto updated = memberService.updateMyProfile(email, req);
+
+        return ResponseEntity.ok(
+                DefaultResponseDto.<UserProfileDto>builder()
+                        .isSuccess(true)
+                        .code("2001")
+                        .message("프로필 수정 성공")
+                        .data(updated)
+                        .build()
+        );
     }
 }
