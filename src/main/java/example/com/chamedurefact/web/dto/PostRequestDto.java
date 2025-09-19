@@ -2,20 +2,13 @@ package example.com.chamedurefact.web.dto;
 
 import example.com.chamedurefact.domain.enums.AdmissionType;
 import example.com.chamedurefact.domain.enums.Major;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-
-import java.util.List;
 
 @Data
-public class MainPageResponseDto {
-
-    private List<MentoInfoDto> popular;
+public class PostRequestDto {
+    private String title;
+    private String content;
+    private String hashTag;
     private AdmissionType admissionType;
-    private List<MentoInfoDto> recommendByAdmissionType;
     private Major major;
-    private List<MentoInfoDto> recommendByMajor;
-
-
 }

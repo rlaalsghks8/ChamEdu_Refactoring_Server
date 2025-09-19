@@ -9,7 +9,9 @@ import lombok.Getter;
 @Builder
 public class MentoInfoDto {
     private Long mentoId;
+    private Long postId;
     private String name;
+    private String email;
     private String university;
     private Major major;
     private AdmissionType admissionType;

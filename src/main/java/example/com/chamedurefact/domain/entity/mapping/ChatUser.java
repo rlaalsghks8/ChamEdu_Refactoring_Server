@@ -4,11 +4,13 @@ import example.com.chamedurefact.domain.entity.Chat;
 import example.com.chamedurefact.domain.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class ChatUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
