@@ -2,8 +2,14 @@ package example.com.chamedurefact.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import example.com.chamedurefact.domain.entity.User;
+import example.com.chamedurefact.domain.enums.Major;
+import example.com.chamedurefact.domain.enums.RecruitmentType;
+import example.com.chamedurefact.jwt.JwtTokenProvider;
 import example.com.chamedurefact.repository.UserRepository;
 import example.com.chamedurefact.web.dto.KakaoTokenResponseDto;
+import example.com.chamedurefact.web.dto.LoginResponseDto;
+import example.com.chamedurefact.web.dto.UserProfileDto;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +26,8 @@ import java.util.*;
 public class MemberService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @Value("${kakao.client-id}")
     private String clientId;
@@ -62,7 +70,7 @@ public class MemberService {
             throw new IllegalStateException("카카오 토큰 교환 실패: " + res.getStatusCode());
         }
 
-        //응답 Body를 파싱, 최상위 필드의 access_token을 꺼냄
+        //응답 Body를 파싱, 최상위 필드의 access token을 꺼냄
         try {
             ObjectMapper mapper = new ObjectMapper();
             KakaoTokenResponseDto dto = mapper.readValue(
@@ -103,7 +111,6 @@ public class MemberService {
         try {
             JsonNode root = objectMapper.readTree(res.getBody());
 
-            // email: kakao_account.email (동의 필요)
             String email = null;
             JsonNode kakaoAccount = root.path("kakao_account");
             if (kakaoAccount.isObject()) {
@@ -111,7 +118,6 @@ public class MemberService {
                 if (emailNode.isTextual()) email = emailNode.asText();
             }
 
-            // nickname: kakao_account.profile.nickname 우선, 없으면 properties.nickname
             String nickname = null;
             if (kakaoAccount.isObject()) {
                 JsonNode profile = kakaoAccount.path("profile");
@@ -132,7 +138,6 @@ public class MemberService {
             userInfo.put("email", email);
             userInfo.put("nickname", nickname);
 
-            // 확인용(마스킹)
             log.info("Kakao user email={}, nickname={}",
                     email != null ? email : "(null)",
                     nickname != null ? nickname : "(null)");
@@ -144,7 +149,48 @@ public class MemberService {
         }
     }
 
-    //사용자 정보 확인, 없으면 회원가입 후 로그인, 있으면 로그인 (JWT 토큰 발급)
+    //로그인
+    public LoginResponseDto login(HashMap<String, Object> userInfo) {
+        String email = (String) userInfo.get("email");
+        String name = (String) userInfo.get("nickname");
 
-    // 로그인 시 추가정보 설정 여부 보내줘야 하나?
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        LoginResponseDto response = new LoginResponseDto();
+
+        response.setEmail(email);
+        response.setNickname(name);
+        response.setToken(jwtTokenProvider.createToken(email));
+
+        if (userOptional.isPresent()) {
+            //기존 회원
+            User user = userOptional.get();
+            response.setNewUser(!user.getIsProfileSetup());
+        } else {
+            //신규 회원 (회원가입)
+            User newUser = User.builder()
+                    .email(email)
+                    .realName(name)
+                    .isProfileSetup(false)
+                    .build();
+            userRepository.save(newUser);
+            response.setNewUser(true);
+        }
+
+        return response;
+    }
+
+    //신규 회원 프로필 설정
+    public void setupProfile(UserProfileDto profileDto) {
+        User user = userRepository.findByEmail(profileDto.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        user.setNickname(profileDto.getNickname());
+        user.setMentor(profileDto.isMentor());
+        user.setUniversity(profileDto.getUniversity());
+        user.setMajor(Major.fromKoreanName(profileDto.getMajor()));
+        user.setRecruitmentType(RecruitmentType.fromKoreanName(profileDto.getRecruitmentType()));
+        user.setIsProfileSetup(true);
+
+        userRepository.save(user);
+    }
 }
