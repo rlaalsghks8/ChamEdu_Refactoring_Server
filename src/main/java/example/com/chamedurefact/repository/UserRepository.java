@@ -14,6 +14,7 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User,Long> {
     User findByEmail(String email);
+    boolean existsByNickname(String nickname);
 
     @Query("SELECT u FROM User u JOIN u.posts p WHERE p.id = :postId")
     User findByPostId(@Param("postId") Long postId);
@@ -82,8 +83,5 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
 
     
-
-
-
 
 }
