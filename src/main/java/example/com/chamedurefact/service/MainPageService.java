@@ -1,9 +1,12 @@
 package example.com.chamedurefact.service;
 
 import com.sun.tools.javac.Main;
+import example.com.chamedurefact.apiPayload.code.status.ErrorStatus;
+import example.com.chamedurefact.apiPayload.exception.GeneralException;
 import example.com.chamedurefact.domain.entity.User;
 import example.com.chamedurefact.domain.enums.AdmissionType;
 import example.com.chamedurefact.domain.enums.Major;
+import example.com.chamedurefact.domain.enums.RecruitmentType;
 import example.com.chamedurefact.repository.ChatUserRepository;
 import example.com.chamedurefact.repository.PostRepository;
 import example.com.chamedurefact.repository.ReviewRepository;
@@ -40,16 +43,17 @@ public class MainPageService {
 
     public MainPageResponseDto mainPage(String email){
 
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_FOUND));;
 
-        AdmissionType userAdmissionType = user.getAdmissionType();
+        RecruitmentType userRecruitmentType = user.getRecruitmentType();
         Major userMajor = user.getMajor();
 
         MainPageResponseDto dto = new MainPageResponseDto();
 
         dto.setPopular(populateMentoInfoDtoList());
-        dto.setAdmissionType(userAdmissionType);
-        dto.setRecommendByAdmissionType(admissionMentoInfoDtoList(userAdmissionType));
+        dto.setRecruitmentType(userRecruitmentType);
+        dto.setRecommendByAdmissionType(admissionMentoInfoDtoList(userRecruitmentType));
         dto.setMajor(userMajor);
         dto.setRecommendByMajor(majorMentoInfoDtoList(userMajor));
 
@@ -65,9 +69,9 @@ public class MainPageService {
                         .mentoId(user.getId())
                         .name(user.getNickname())
                         .postId(postRepository.findByUser_Id(user.getId()).getId())
-                        .university(user.getSchool())
+                        .university(user.getUniversity())
                         .major(user.getMajor())
-                        .admissionType(user.getAdmissionType())
+                        .recruitmentType(user.getRecruitmentType())
                         .ratingAvg(reviewRepository.findAverageReviewScoreByUserId(user.getId()))
                         .reviewCount(reviewRepository.countByUser_Id(user.getId()))
                         .menteeCount(chatUserRepository.countByUser_id(user.getId()))
@@ -77,16 +81,16 @@ public class MainPageService {
         return mentoInfoDtoList;
     }
 
-    public List<MentoInfoDto> admissionMentoInfoDtoList(AdmissionType admissionType) {
-        List<MentoInfoDto> mentoInfoDtoList = userRepository.findTop5ByAdmissionTypeOrderByAvgReviewScoreAndHasPost(admissionType)
+    public List<MentoInfoDto> admissionMentoInfoDtoList(RecruitmentType recruitmentType) {
+        List<MentoInfoDto> mentoInfoDtoList = userRepository.findTop5ByAdmissionTypeOrderByAvgReviewScoreAndHasPost(recruitmentType)
                 .stream()
                 .map(user->MentoInfoDto.builder()
                         .mentoId(user.getId())
                         .postId(postRepository.findByUser_Id(user.getId()).getId())
                         .name(user.getNickname())
-                        .university(user.getSchool())
+                        .university(user.getUniversity())
                         .major(user.getMajor())
-                        .admissionType(user.getAdmissionType())
+                        .recruitmentType(user.getRecruitmentType())
                         .ratingAvg(reviewRepository.findAverageReviewScoreByUserId(user.getId()))
                         .reviewCount(reviewRepository.countByUser_Id(user.getId()))
                         .menteeCount(chatUserRepository.countByUser_id(user.getId()))
@@ -104,9 +108,9 @@ public class MainPageService {
                         .mentoId(user.getId())
                         .postId(postRepository.findByUser_Id(user.getId()).getId())
                         .name(user.getNickname())
-                        .university(user.getSchool())
+                        .university(user.getUniversity())
                         .major(user.getMajor())
-                        .admissionType(user.getAdmissionType())
+                        .recruitmentType(user.getRecruitmentType())
                         .ratingAvg(reviewRepository.findAverageReviewScoreByUserId(user.getId()))
                         .reviewCount(reviewRepository.countByUser_Id(user.getId()))
                         .menteeCount(chatUserRepository.countByUser_id(user.getId()))
@@ -135,9 +139,9 @@ public class MainPageService {
                 .mentoId(user.getId())
                 .postId(postRepository.findByUser_Id(user.getId()).getId())
                 .name(user.getNickname())
-                .university(user.getSchool())
+                .university(user.getUniversity())
                 .major(user.getMajor())
-                .admissionType(user.getAdmissionType())
+                .recruitmentType(user.getRecruitmentType())
                 .ratingAvg(reviewRepository.findAverageReviewScoreByUserId(user.getId()))
                 .reviewCount(reviewRepository.countByUser_Id(user.getId()))
                 .menteeCount(chatUserRepository.countByUser_id(user.getId()))

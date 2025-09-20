@@ -1,15 +1,15 @@
 package example.com.chamedurefact.web.dto;
-
 import lombok.*;
-
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class LoginResponseDto {
+public class UserProfileDto {
     private String email;
+    private boolean isMentor;
     private String nickname;
-    private boolean newUser;
-    private String token;
+    private String university;
+    private String major;
+    private String recruitmentType;
 }

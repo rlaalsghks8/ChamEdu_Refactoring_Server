@@ -1,5 +1,7 @@
 package example.com.chamedurefact.service;
 
+import example.com.chamedurefact.apiPayload.code.status.ErrorStatus;
+import example.com.chamedurefact.apiPayload.exception.GeneralException;
 import example.com.chamedurefact.domain.entity.Post;
 import example.com.chamedurefact.domain.entity.Review;
 import example.com.chamedurefact.domain.entity.User;
@@ -32,7 +34,8 @@ public class MentoMypageService {
 
 
     public MentoMypageResponseDto mentoMypage(String email){
-        User  mento =  userRepository.findByEmail(email);
+        User  mento =  userRepository.findByEmail(email)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_FOUND));;
         Post mentoPost  = postRepository.findByUser_Id(mento.getId());
 
         MentoMypageResponseDto mentoMypageDto = new MentoMypageResponseDto();

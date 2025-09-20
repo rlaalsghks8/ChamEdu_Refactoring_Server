@@ -2,6 +2,7 @@ package example.com.chamedurefact.web.dto;
 
 import example.com.chamedurefact.domain.enums.AdmissionType;
 import example.com.chamedurefact.domain.enums.Major;
+import example.com.chamedurefact.domain.enums.RecruitmentType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,7 +15,7 @@ public class MentoInfoDto {
     private String email;
     private String university;
     private Major major;
-    private AdmissionType admissionType;
+    private RecruitmentType recruitmentType;
     private long ratingAvg;
     private int reviewCount;
     private int menteeCount;

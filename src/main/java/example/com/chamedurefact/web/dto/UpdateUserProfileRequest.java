@@ -2,14 +2,13 @@ package example.com.chamedurefact.web.dto;
 
 import lombok.*;
 
-@Getter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-public class LoginResponseDto {
-    private String email;
+public class UpdateUserProfileRequest {
     private String nickname;
-    private boolean newUser;
-    private String token;
+    private String university;
+    private String major;
+    private String recruitmentType;
 }

@@ -4,6 +4,7 @@ import example.com.chamedurefact.domain.entity.User;
 
 import example.com.chamedurefact.domain.enums.AdmissionType;
 import example.com.chamedurefact.domain.enums.Major;
+import example.com.chamedurefact.domain.enums.RecruitmentType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,9 +12,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User,Long> {
-    User findByEmail(String email);
+
+    Optional<User> findByEmail(String email);
+
     boolean existsByNickname(String nickname);
 
     @Query("SELECT u FROM User u JOIN u.posts p WHERE p.id = :postId")
@@ -39,7 +43,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
             "ORDER BY COALESCE(AVG(r.review_score), 0) DESC " +
             "LIMIT 5",
             nativeQuery = true)
-    List<User> findTop5ByAdmissionTypeOrderByAvgReviewScoreAndHasPost(@Param("admissionType") AdmissionType admissionType);
+    List<User> findTop5ByAdmissionTypeOrderByAvgReviewScoreAndHasPost(@Param("admissionType") RecruitmentType recruitmentType);
 
     @Query(value = "SELECT u.* " +
             "FROM User u " +
