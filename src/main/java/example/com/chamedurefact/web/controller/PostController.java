@@ -24,6 +24,7 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    @Operation(summary = "게시글 상세조회", description = "게시글 상세조회 api")
     @GetMapping("/chamedu/post")
     public ApiResponse<MentoPostResponseDto> mentoPostInfo(@RequestParam Long postId){
 
@@ -35,21 +36,24 @@ public class PostController {
         return ApiResponse.onSuccess(mentoPostInfo);
     }
 
+    @Operation(summary = "게시글 작성", description = "게시글 작성 api")
     @PostMapping("/chamedu/mento/posts")
-    public ApiResponse<String> postWrite(@RequestBody PostRequestDto dto){
+    public ApiResponse<String> postWrite(@RequestBody PostRequestDto dto,Authentication authentication){
 
-        String email = null;
+        String email = (String)authentication.getPrincipal();
         postService.postWrite(dto,email);
 
         return ApiResponse.onSuccess("게시글 작성 성공!");
     }
 
+    @Operation(summary = "게시글 수정", description = "게시글 수정 api")
     @PutMapping("/chamedu/mento/posts/{postId}")
     public ApiResponse<String> updatePost(
             @PathVariable Long postId,
-            @RequestBody PostRequestDto dto
+            @RequestBody PostRequestDto dto,
+            Authentication authentication
     ) {
-        String email = null; // TODO: 로그인 인증에서 email 추출해서 주입
+        String email = (String)authentication.getPrincipal(); // TODO: 로그인 인증에서 email 추출해서 주입
         postService.updatePost(postId, dto, email);
         return ApiResponse.onSuccess("게시글 수정 성공!");
     }
